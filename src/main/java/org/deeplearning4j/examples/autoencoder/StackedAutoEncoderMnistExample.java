@@ -1,4 +1,4 @@
-package org.deeplearning4j.examples.deepbelief;
+package org.deeplearning4j.examples.autoencoder;
 
 import org.deeplearning4j.datasets.iterator.DataSetIterator;
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
@@ -7,7 +7,7 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.GradientNormalization;
+import org.deeplearning4j.nn.conf.layers.AutoEncoder;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -26,9 +26,9 @@ import java.util.Collections;
 /**
  * Created by agibsonccc on 9/11/14.
  */
-public class DBNMnistFullExample {
+public class StackedAutoEncoderMnistExample {
 
-    private static Logger log = LoggerFactory.getLogger(DBNMnistFullExample.class);
+    private static Logger log = LoggerFactory.getLogger(StackedAutoEncoderMnistExample.class);
 
     public static void main(String[] args) throws Exception {
         final int numRows = 28;
@@ -53,25 +53,23 @@ public class DBNMnistFullExample {
            .momentumAfter(Collections.singletonMap(3, 0.9))
            .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
            .list(4)
-           .layer(0, new RBM.Builder().nIn(numRows*numColumns).nOut(500)
-                         .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
-                         .visibleUnit(RBM.VisibleUnit.BINARY)
-                         .hiddenUnit(RBM.HiddenUnit.BINARY)
-                         .build())
-           .layer(1, new RBM.Builder().nIn(500).nOut(250)
-                         .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
-                         .visibleUnit(RBM.VisibleUnit.BINARY)
-                         .hiddenUnit(RBM.HiddenUnit.BINARY)
-                         .build())
-           .layer(2, new RBM.Builder().nIn(250).nOut(200)
-                         .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
-                         .visibleUnit(RBM.VisibleUnit.BINARY)
-                         .hiddenUnit(RBM.HiddenUnit.BINARY)
-                         .build())
-           .layer(3, new OutputLayer.Builder(LossFunction.NEGATIVELOGLIKELIHOOD).activation("softmax")
-                         .nIn(200).nOut(outputNum).build())
+           .layer(0, new AutoEncoder.Builder().nIn(numRows * numColumns).nOut(500)
+                   .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
+                   .corruptionLevel(0.3)
+                   .build())
+                .layer(1, new AutoEncoder.Builder().nIn(500).nOut(250)
+                        .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
+                        .corruptionLevel(0.3)
+
+                        .build())
+                .layer(2, new AutoEncoder.Builder().nIn(250).nOut(200)
+                        .weightInit(WeightInit.XAVIER).lossFunction(LossFunction.RMSE_XENT)
+                        .corruptionLevel(0.3)
+                        .build())
+                .layer(3, new OutputLayer.Builder(LossFunction.NEGATIVELOGLIKELIHOOD).activation("softmax")
+                        .nIn(200).nOut(outputNum).build())
            .pretrain(true).backprop(false)
-           .build();
+                .build();
 
         MultiLayerNetwork model = new MultiLayerNetwork(conf);
         model.init();
