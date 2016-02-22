@@ -20,7 +20,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.deeplearning4j.plot.NeuralNetPlotter;
+//import org.deeplearning4j.plot.NeuralNetPlotter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,7 +37,8 @@ public class MLPBackpropIris {
         Nd4j.MAX_SLICES_TO_PRINT = 10;
         Nd4j.MAX_ELEMENTS_PER_SLICE = 10;
 
-        final int numInputs = 4;
+
+
         int numOutputs = 3;
         int numSamples = 150;
         int batchSize = 150;
